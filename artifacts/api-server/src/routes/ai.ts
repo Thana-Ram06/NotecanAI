@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import OpenAI from "openai";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
@@ -32,7 +33,7 @@ router.post("/generate", async (req, res) => {
     const content = completion.choices[0]?.message?.content ?? "";
     res.json({ content });
   } catch (err) {
-    req.log.error({ err }, "AI generate error");
+    logger.error({ err }, "AI generate error");
     res.status(500).json({ error: "Failed to generate content" });
   }
 });
@@ -62,7 +63,7 @@ router.post("/improve", async (req, res) => {
     const improved = completion.choices[0]?.message?.content ?? "";
     res.json({ content: improved });
   } catch (err) {
-    req.log.error({ err }, "AI improve error");
+    logger.error({ err }, "AI improve error");
     res.status(500).json({ error: "Failed to improve content" });
   }
 });
@@ -104,7 +105,7 @@ Example: [{"type":"rectangle","content":"Start","x":100,"y":150},{"type":"rectan
 
     res.json({ blocks });
   } catch (err) {
-    req.log.error({ err }, "AI diagram error");
+    logger.error({ err }, "AI diagram error");
     res.status(500).json({ error: "Failed to generate diagram" });
   }
 });
