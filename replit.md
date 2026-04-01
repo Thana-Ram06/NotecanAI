@@ -16,6 +16,26 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 
+## Artifacts
+
+### `artifacts/notecanai` (`@workspace/notecanai`)
+
+NoteCanAI — AI-powered canvas note-taking app. Frontend-only React+Vite app served at `/`.
+
+- Zustand store with localStorage persistence (`notecanai-blocks`)
+- Canvas with draggable text, rectangle, and circle blocks
+- Toolbar with block creation, color picker, font selector, AI actions, dark mode toggle
+- AI features: generate notes, improve content, generate diagrams — all via `/api/ai/*`
+- No database — fully client-side with localStorage
+
+### `artifacts/api-server` — AI Routes
+
+- `POST /api/ai/generate` — generate note content from a prompt
+- `POST /api/ai/improve` — improve/rewrite selected block content
+- `POST /api/ai/diagram` — generate diagram blocks from a description
+
+Requires `OPENAI_API_KEY` secret. Uses `gpt-4.1-mini`.
+
 ## Structure
 
 ```text
