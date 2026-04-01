@@ -20,7 +20,8 @@ export const Canvas: React.FC<CanvasProps> = ({ improvingBlockId }) => {
     }
   };
 
-  const isDrawMode = mode === 'draw';
+  const isInteractiveMode = mode === 'draw' || mode === 'erase-area' || mode === 'erase-line';
+  const blocksDisabled = mode !== 'select';
 
   return (
     <div
@@ -40,11 +41,11 @@ export const Canvas: React.FC<CanvasProps> = ({ improvingBlockId }) => {
             block={block}
             isSelected={selectedBlockIds.includes(block.id)}
             isImproving={block.id === improvingBlockId}
-            disabled={isDrawMode}
+            disabled={blocksDisabled}
           />
         ))}
 
-        {isDrawMode && (
+        {isInteractiveMode && (
           <DrawingCanvas width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
         )}
       </div>

@@ -20,13 +20,16 @@ export interface DrawingPath {
   width: number;
 }
 
+export type AppMode = 'select' | 'draw' | 'erase-area' | 'erase-line';
+
 interface AppState {
   blocks: Block[];
   selectedBlockIds: string[];
   drawings: DrawingPath[];
-  mode: 'select' | 'draw';
+  mode: AppMode;
   strokeColor: string;
   strokeWidth: number;
+  eraseRadius: number;
 
   addBlock: (block: Omit<Block, 'id'>) => void;
   updateBlock: (id: string, updates: Partial<Block>) => void;
@@ -35,11 +38,14 @@ interface AppState {
   selectBlock: (id: string | null) => void;
 
   addDrawing: (drawing: DrawingPath) => void;
+  removeDrawing: (id: string) => void;
+  updateDrawings: (drawings: DrawingPath[]) => void;
   clearDrawings: () => void;
 
-  setMode: (mode: 'select' | 'draw') => void;
+  setMode: (mode: AppMode) => void;
   setStrokeColor: (color: string) => void;
   setStrokeWidth: (width: number) => void;
+  setEraseRadius: (radius: number) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -51,6 +57,7 @@ export const useStore = create<AppState>()(
       mode: 'select',
       strokeColor: '#1a1a1a',
       strokeWidth: 3,
+      eraseRadius: 20,
 
       addBlock: (block) => set((state) => ({
         blocks: [...state.blocks, { ...block, id: crypto.randomUUID() }]
@@ -68,11 +75,16 @@ export const useStore = create<AppState>()(
       addDrawing: (drawing) => set((state) => ({
         drawings: [...state.drawings, drawing]
       })),
+      removeDrawing: (id) => set((state) => ({
+        drawings: state.drawings.filter(d => d.id !== id)
+      })),
+      updateDrawings: (drawings) => set({ drawings }),
       clearDrawings: () => set({ drawings: [] }),
 
       setMode: (mode) => set({ mode, selectedBlockIds: [] }),
       setStrokeColor: (color) => set({ strokeColor: color }),
       setStrokeWidth: (width) => set({ strokeWidth: width }),
+      setEraseRadius: (radius) => set({ eraseRadius: radius }),
     }),
     {
       name: 'notecanai-blocks',

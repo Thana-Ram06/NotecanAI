@@ -1,6 +1,6 @@
 import React from 'react';
 import { useStore } from '@/store/useStore';
-import { Type, Square, Circle, Trash2, Wand2, Moon, Sun, Loader2, Pencil, MousePointer, Eraser } from 'lucide-react';
+import { Type, Square, Circle, Trash2, Wand2, Moon, Sun, Loader2, Pencil, MousePointer, Eraser, Paintbrush, ScanLine } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/components/ui/theme-provider';
@@ -19,6 +19,7 @@ const STROKE_COLORS = [
 ];
 
 const STROKE_WIDTHS = [1, 2, 3, 5, 8, 12];
+const ERASE_SIZES = [10, 20, 35, 55, 80];
 
 const FONTS = [
   { key: 'inter', label: 'Inter', style: { fontFamily: 'Inter, sans-serif' } },
@@ -45,7 +46,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
   const { theme, setTheme } = useTheme();
   const {
     blocks, selectedBlockIds, addBlock, updateBlock, removeBlock,
-    mode, setMode, strokeColor, setStrokeColor, strokeWidth, setStrokeWidth, clearDrawings
+    mode, setMode, strokeColor, setStrokeColor, strokeWidth, setStrokeWidth,
+    clearDrawings, eraseRadius, setEraseRadius
   } = useStore();
 
   const selectedBlock = selectedBlockIds.length > 0
@@ -53,9 +55,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     : null;
 
   const isDrawMode = mode === 'draw';
+  const isEraseMode = mode === 'erase-area' || mode === 'erase-line';
 
   const handleAddBlock = (type: "text" | "rectangle" | "circle") => {
-    if (isDrawMode) setMode('select');
+    if (mode !== 'select') setMode('select');
     const x = window.scrollX + window.innerWidth / 2;
     const y = window.scrollY + window.innerHeight / 2;
     addBlock({
@@ -85,7 +88,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          className={cn("rounded-full w-7 h-7", !isDrawMode && "bg-background shadow-sm")}
+          className={cn("rounded-full w-7 h-7", mode === 'select' && "bg-background shadow-sm")}
           onClick={() => setMode('select')}
           title="Select mode"
           data-testid="mode-select"
@@ -102,6 +105,48 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         >
           <Pencil className="w-3.5 h-3.5" />
         </Button>
+
+        {/* Eraser mode dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn("rounded-full w-7 h-7", isEraseMode && "bg-background shadow-sm")}
+              title="Eraser tools"
+              data-testid="mode-erase"
+            >
+              <Eraser className="w-3.5 h-3.5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-44">
+            <DropdownMenuItem
+              onClick={() => setMode('erase-area')}
+              className={cn("gap-2", mode === 'erase-area' && "bg-accent")}
+              data-testid="erase-area"
+            >
+              <Paintbrush className="w-3.5 h-3.5" />
+              Area Eraser
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => setMode('erase-line')}
+              className={cn("gap-2", mode === 'erase-line' && "bg-accent")}
+              data-testid="erase-line"
+            >
+              <ScanLine className="w-3.5 h-3.5" />
+              Line Eraser
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={clearDrawings}
+              className="gap-2 text-destructive focus:text-destructive"
+              data-testid="clear-drawings"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Clear All
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="w-px h-5 bg-border" />
@@ -163,24 +208,52 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
+        </>
+      )}
 
-            {/* Clear drawings */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full w-8 h-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-              onClick={clearDrawings}
-              title="Clear all drawings"
-              data-testid="clear-drawings"
-            >
-              <Eraser className="w-4 h-4" />
-            </Button>
+      {/* Erase mode controls */}
+      {isEraseMode && (
+        <>
+          <div className="w-px h-5 bg-border" />
+          <div className="flex items-center gap-2">
+            {mode === 'erase-area' ? (
+              <>
+                <span className="text-xs text-muted-foreground">Size:</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-8 rounded-full px-3 gap-1" title="Eraser size" data-testid="erase-size-picker">
+                      <Eraser className="w-3.5 h-3.5" />
+                      <span className="text-xs">{eraseRadius * 2}px</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="p-2 w-32">
+                    {ERASE_SIZES.map(r => (
+                      <DropdownMenuItem
+                        key={r}
+                        className={cn("flex items-center gap-2", eraseRadius === r && "bg-accent")}
+                        onClick={() => setEraseRadius(r)}
+                        data-testid={`erase-size-${r}`}
+                      >
+                        <div
+                          className="rounded-full bg-foreground/30 border border-foreground/20 shrink-0"
+                          style={{ width: Math.min(r, 32), height: Math.min(r, 32) }}
+                        />
+                        <span className="text-xs">{r * 2}px</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <span className="text-xs text-muted-foreground">Click a stroke to erase it</span>
+            )}
           </div>
         </>
       )}
 
       {/* Block styling (select mode with selected block) */}
-      {!isDrawMode && selectedBlock && (
+      {mode === 'select' && selectedBlock && (
         <>
           <div className="w-px h-5 bg-border" />
           <div className="flex items-center gap-1.5">
