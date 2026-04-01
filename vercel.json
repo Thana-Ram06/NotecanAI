@@ -1,6 +1,6 @@
 {
   "framework": null,
-  "buildCommand": "pnpm --filter @workspace/notecanai run build && mkdir -p public && cp -r artifacts/notecanai/dist/. public",
+  "buildCommand": "pnpm --filter @workspace/notecanai run build",
   "outputDirectory": "public",
   "installCommand": "pnpm install",
   "rewrites": [
