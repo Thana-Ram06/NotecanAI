@@ -1,0 +1,14 @@
+{
+  "buildCommand": "pnpm --filter @workspace/notecanai run build",
+  "outputDirectory": "artifacts/notecanai/dist/public",
+  "installCommand": "pnpm install",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "build": {
+    "env": {
+      "BASE_PATH": "/",
+      "PORT": "3000"
+    }
+  }
+}
