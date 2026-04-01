@@ -1,10 +1,11 @@
 import React from 'react';
 import { useStore } from '@/store/useStore';
-import { Type, Square, Circle, Trash2, Wand2, Moon, Sun, Loader2, Pencil, MousePointer, Eraser, Paintbrush, ScanLine } from 'lucide-react';
+import { Type, Square, Circle, Trash2, Wand2, Moon, Sun, Loader2, Pencil, MousePointer, Eraser, Paintbrush, ScanLine, Download, FileImage, FileJson } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useTheme } from '@/components/ui/theme-provider';
 import { cn } from '@/lib/utils';
+import { exportAsPNG, exportAsJSON } from '@/lib/export';
 
 const BLOCK_COLORS = [
   '#ffffff', '#f8f9fa', '#f1f5f9', '#e2e8f0',
@@ -45,7 +46,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 }) => {
   const { theme, setTheme } = useTheme();
   const {
-    blocks, selectedBlockIds, addBlock, updateBlock, removeBlock,
+    blocks, drawings, selectedBlockIds, addBlock, updateBlock, removeBlock,
     mode, setMode, strokeColor, setStrokeColor, strokeWidth, setStrokeWidth,
     clearDrawings, eraseRadius, setEraseRadius
   } = useStore();
@@ -313,6 +314,33 @@ export const Toolbar: React.FC<ToolbarProps> = ({
       )}
 
       <div className="w-px h-5 bg-border" />
+
+      {/* Download */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="rounded-full w-8 h-8" title="Download / Export" data-testid="download-menu">
+            <Download className="w-4 h-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuItem
+            className="gap-2"
+            onClick={() => exportAsPNG(blocks, drawings)}
+            data-testid="export-png"
+          >
+            <FileImage className="w-3.5 h-3.5" />
+            Export as PNG
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="gap-2"
+            onClick={() => exportAsJSON(blocks, drawings)}
+            data-testid="export-json"
+          >
+            <FileJson className="w-3.5 h-3.5" />
+            Export as JSON
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {/* AI & theme */}
       <div className="flex items-center gap-1">
