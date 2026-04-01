@@ -1,42 +1,30 @@
 import { execSync } from "child_process";
-import { cpSync, mkdirSync, writeFileSync } from "fs";
+import { cpSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
-// Navigate to true project root (two levels up from artifacts/api-server/)
+// This runs from artifacts/api-server/ — navigate up to project root
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "../..");
 
 console.log("Project root:", root);
+console.log("Build dir:", __dirname);
 
 process.env.PORT = "3000";
 process.env.BASE_PATH = "/";
 
 // Build the frontend
 console.log("Building frontend...");
-execSync(`pnpm --filter @workspace/notecanai run build`, {
+execSync("pnpm --filter @workspace/notecanai run build", {
   stdio: "inherit",
   cwd: root,
 });
 
+// Copy to dist/ inside artifacts/api-server/ — this is where Vercel looks
 const distPath = resolve(root, "artifacts/notecanai/dist");
+const outputPath = resolve(__dirname, "dist");
+mkdirSync(outputPath, { recursive: true });
+cpSync(distPath, outputPath, { recursive: true });
 
-// Create Vercel Build Output API structure
-const staticDir = resolve(root, ".vercel/output/static");
-mkdirSync(staticDir, { recursive: true });
-cpSync(distPath, staticDir, { recursive: true });
-console.log("Copied static files to", staticDir);
-
-// SPA routing config
-writeFileSync(
-  resolve(root, ".vercel/output/config.json"),
-  JSON.stringify({
-    version: 3,
-    routes: [
-      { handle: "filesystem" },
-      { src: "/(.*)", dest: "/index.html" },
-    ],
-  })
-);
-
+console.log("Output ready at:", outputPath);
 console.log("Vercel build complete!");

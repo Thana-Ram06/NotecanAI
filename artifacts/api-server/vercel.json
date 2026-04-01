@@ -1,5 +1,15 @@
 {
   "framework": null,
   "buildCommand": "node vercel-build.mjs",
-  "installCommand": "cd ../.. && pnpm install"
+  "outputDirectory": "dist",
+  "installCommand": "cd ../.. && pnpm install",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "build": {
+    "env": {
+      "BASE_PATH": "/",
+      "PORT": "3000"
+    }
+  }
 }
