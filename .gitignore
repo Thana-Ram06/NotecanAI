@@ -4,6 +4,7 @@
 dist
 tmp
 /public
+/.vercel/output
 out-tsc
 *.tsbuildinfo
 .expo
