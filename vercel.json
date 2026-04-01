@@ -1,6 +1,7 @@
 {
+  "framework": null,
   "buildCommand": "pnpm --filter @workspace/notecanai run build",
-  "outputDirectory": "artifacts/notecanai/dist/public",
+  "outputDirectory": "artifacts/notecanai/dist",
   "installCommand": "pnpm install",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
