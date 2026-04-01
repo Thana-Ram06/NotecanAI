@@ -1,0 +1,95 @@
+Build a modern web application called "NoteCanAI".
+
+Tech Stack:
+- Next.js 16 (App Router)
+- TypeScript
+- Tailwind CSS
+- Zustand for state management
+- No backend database (use localStorage for persistence)
+- Vercel-ready project structure
+
+Core Features:
+1. Canvas-based note system (not HTML canvas, use draggable div-based blocks)
+2. Users can create different types of blocks:
+   - Text notes (editable content)
+   - Rectangle shapes
+   - Circle shapes
+3. Each block should support:
+   - Drag and move freely on the canvas
+   - Change background color
+   - Change font family (Inter, serif, monospace)
+   - Editable content (for text blocks)
+
+UI Requirements:
+- Premium minimal SaaS design (inspired by tpot.cc, lnk.ad, tree.je)
+- Centered layout with clean spacing
+- Light and dark mode toggle
+- Rounded corners, soft borders, minimal shadows
+- Top toolbar with actions:
+  - Add Note
+  - Add Rectangle
+  - Add Circle
+  - Color picker
+  - Font selector
+  - AI actions (Generate, Improve, Diagram)
+
+State Management:
+- Use Zustand store for managing blocks
+- Each block structure:
+  {
+    id: string,
+    type: "text" | "rectangle" | "circle",
+    content?: string,
+    x: number,
+    y: number,
+    color: string,
+    font: string
+  }
+
+Persistence:
+- Automatically save blocks to localStorage
+- Load saved blocks on app start
+
+AI Integration:
+- Use OpenAI API via Next.js API route (/api/ai)
+- Install "openai" package
+- Use model: gpt-4.1-mini
+
+AI Features:
+1. Generate Notes:
+   - Input prompt → AI returns structured notes → create new text block
+
+2. Improve Notes:
+   - Take selected text block → improve/rewrite content
+
+3. Diagram Generator:
+   - Input text like "Login flow"
+   - AI returns JSON array of blocks (rectangles with text and positions)
+   - Render them directly on canvas
+
+Example AI diagram response format:
+[
+  { "type": "rectangle", "content": "Login", "x": 100, "y": 100 },
+  { "type": "rectangle", "content": "Dashboard", "x": 300, "y": 100 }
+]
+
+File Structure:
+- app/page.tsx (main canvas)
+- components/Canvas.tsx
+- components/Block.tsx
+- components/Toolbar.tsx
+- store/useStore.ts
+- app/api/ai/route.ts
+
+Interactions:
+- Dragging should be smooth using mouse events
+- Blocks should stay within viewport
+- Clicking a block selects it
+- Selected block can be edited, styled, or AI-enhanced
+
+Environment:
+- Use process.env.OPENAI_API_KEY
+- Ensure app runs with "npm run dev"
+
+Goal:
+Build a clean, fast, minimal, and modern AI-powered notes canvas app that is fully functional and deployable on Vercel.
