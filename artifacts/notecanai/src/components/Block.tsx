@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Block, useStore } from '@/store/useStore';
 import { cn } from '@/lib/utils';
 
@@ -6,24 +6,34 @@ interface BlockProps {
   block: Block;
   isSelected: boolean;
   isImproving?: boolean;
+  disabled?: boolean;
 }
 
-export const BlockComponent: React.FC<BlockProps> = ({ block, isSelected, isImproving }) => {
+const FONT_FAMILY_MAP: Record<string, string> = {
+  'inter': 'Inter, sans-serif',
+  'serif': 'Georgia, serif',
+  'mono': 'Menlo, monospace',
+  'patrick-hand': "'Patrick Hand', cursive",
+  'caveat': "'Caveat', cursive",
+  'indie-flower': "'Indie Flower', cursive",
+};
+
+export const BlockComponent: React.FC<BlockProps> = ({ block, isSelected, isImproving, disabled }) => {
   const { updateBlock, selectBlock } = useStore();
   const [isEditing, setIsEditing] = useState(false);
   const blockRef = useRef<HTMLDivElement>(null);
   const contentEditableRef = useRef<HTMLDivElement>(null);
-  
+
   const isDragging = useRef(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const initialPos = useRef({ x: block.x, y: block.y });
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (isEditing) return;
-    
+    if (isEditing || disabled) return;
+
     e.stopPropagation();
     selectBlock(block.id);
-    
+
     isDragging.current = true;
     dragStart.current = { x: e.clientX, y: e.clientY };
     initialPos.current = { x: block.x, y: block.y };
@@ -32,17 +42,17 @@ export const BlockComponent: React.FC<BlockProps> = ({ block, isSelected, isImpr
       if (!isDragging.current) return;
       const dx = moveEvent.clientX - dragStart.current.x;
       const dy = moveEvent.clientY - dragStart.current.y;
-      
+
       const newX = Math.max(0, initialPos.current.x + dx);
       const newY = Math.max(0, initialPos.current.y + dy);
-      
+
       updateBlock(block.id, { x: newX, y: newY });
     };
 
     const handleMouseUp = () => {
       isDragging.current = false;
-      document.removeElementListener('mousemove', handleMouseMove);
-      document.removeElementListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
 
     document.addEventListener('mousemove', handleMouseMove);
@@ -50,12 +60,12 @@ export const BlockComponent: React.FC<BlockProps> = ({ block, isSelected, isImpr
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
+    if (disabled) return;
     e.stopPropagation();
     setIsEditing(true);
     setTimeout(() => {
       if (contentEditableRef.current) {
         contentEditableRef.current.focus();
-        // Move cursor to end
         const selection = window.getSelection();
         const range = document.createRange();
         range.selectNodeContents(contentEditableRef.current);
@@ -80,17 +90,17 @@ export const BlockComponent: React.FC<BlockProps> = ({ block, isSelected, isImpr
     }
   };
 
-  const fontClass = {
-    'inter': 'font-sans',
-    'serif': 'font-serif',
-    'mono': 'font-mono'
-  }[block.font] || 'font-sans';
+  const fontFamily = FONT_FAMILY_MAP[block.font] || FONT_FAMILY_MAP['inter'];
 
   const shapeClasses = {
     'text': 'p-4 min-w-[200px] min-h-[50px] bg-transparent',
-    'rectangle': 'flex items-center justify-center p-4 rounded-md shadow-sm',
+    'rectangle': 'flex items-center justify-center p-4 rounded-xl shadow-sm',
     'circle': 'flex items-center justify-center p-4 rounded-full shadow-sm'
   };
+
+  const textColor = block.type !== 'text'
+    ? (isDarkColor(block.color) ? '#ffffff' : '#1a1a1a')
+    : 'inherit';
 
   const dynamicStyle: React.CSSProperties = {
     position: 'absolute',
@@ -98,11 +108,12 @@ export const BlockComponent: React.FC<BlockProps> = ({ block, isSelected, isImpr
     top: block.y,
     transform: 'translate(-50%, -50%)',
     backgroundColor: block.type !== 'text' ? block.color : undefined,
-    color: block.type !== 'text' && block.color !== '#ffffff' ? '#ffffff' : 'inherit',
     width: block.type !== 'text' ? (block.width || 160) : undefined,
     height: block.type !== 'text' ? (block.height || 100) : undefined,
+    fontFamily,
     zIndex: isSelected ? 10 : 1,
-    cursor: isEditing ? 'text' : 'grab'
+    cursor: disabled ? 'default' : (isEditing ? 'text' : 'grab'),
+    pointerEvents: disabled ? 'none' : 'all',
   };
 
   return (
@@ -111,10 +122,9 @@ export const BlockComponent: React.FC<BlockProps> = ({ block, isSelected, isImpr
       style={dynamicStyle}
       className={cn(
         shapeClasses[block.type],
-        fontClass,
         isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
         isImproving && "animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.5)]",
-        "transition-shadow duration-200"
+        "transition-shadow duration-200 select-none"
       )}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
@@ -131,7 +141,7 @@ export const BlockComponent: React.FC<BlockProps> = ({ block, isSelected, isImpr
           block.type !== 'text' ? "text-center w-full max-h-full overflow-hidden" : "w-full"
         )}
         data-placeholder={block.type === 'text' ? "Type something..." : ""}
-        style={{ color: block.type !== 'text' ? (isDarkColor(block.color) ? '#ffffff' : '#000000') : 'inherit' }}
+        style={{ color: textColor }}
       >
         {block.content}
       </div>
@@ -139,14 +149,14 @@ export const BlockComponent: React.FC<BlockProps> = ({ block, isSelected, isImpr
   );
 };
 
-// Helper to determine text color based on background
 function isDarkColor(hex: string) {
-  if (!hex) return false;
+  if (!hex || !hex.startsWith('#')) return false;
   const c = hex.substring(1);
+  if (c.length < 6) return false;
   const rgb = parseInt(c, 16);
   const r = (rgb >> 16) & 0xff;
-  const g = (rgb >>  8) & 0xff;
-  const b = (rgb >>  0) & 0xff;
+  const g = (rgb >> 8) & 0xff;
+  const b = (rgb >> 0) & 0xff;
   const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
   return luma < 128;
 }

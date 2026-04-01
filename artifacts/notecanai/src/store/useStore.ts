@@ -13,14 +13,33 @@ export interface Block {
   font: string;
 }
 
+export interface DrawingPath {
+  id: string;
+  points: { x: number; y: number }[];
+  color: string;
+  width: number;
+}
+
 interface AppState {
   blocks: Block[];
   selectedBlockIds: string[];
+  drawings: DrawingPath[];
+  mode: 'select' | 'draw';
+  strokeColor: string;
+  strokeWidth: number;
+
   addBlock: (block: Omit<Block, 'id'>) => void;
   updateBlock: (id: string, updates: Partial<Block>) => void;
   removeBlock: (id: string) => void;
   setBlocks: (blocks: Block[]) => void;
   selectBlock: (id: string | null) => void;
+
+  addDrawing: (drawing: DrawingPath) => void;
+  clearDrawings: () => void;
+
+  setMode: (mode: 'select' | 'draw') => void;
+  setStrokeColor: (color: string) => void;
+  setStrokeWidth: (width: number) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -28,8 +47,13 @@ export const useStore = create<AppState>()(
     (set) => ({
       blocks: [],
       selectedBlockIds: [],
-      addBlock: (block) => set((state) => ({ 
-        blocks: [...state.blocks, { ...block, id: crypto.randomUUID() }] 
+      drawings: [],
+      mode: 'select',
+      strokeColor: '#1a1a1a',
+      strokeWidth: 3,
+
+      addBlock: (block) => set((state) => ({
+        blocks: [...state.blocks, { ...block, id: crypto.randomUUID() }]
       })),
       updateBlock: (id, updates) => set((state) => ({
         blocks: state.blocks.map(b => b.id === id ? { ...b, ...updates } : b)
@@ -40,6 +64,15 @@ export const useStore = create<AppState>()(
       })),
       setBlocks: (blocks) => set({ blocks }),
       selectBlock: (id) => set({ selectedBlockIds: id ? [id] : [] }),
+
+      addDrawing: (drawing) => set((state) => ({
+        drawings: [...state.drawings, drawing]
+      })),
+      clearDrawings: () => set({ drawings: [] }),
+
+      setMode: (mode) => set({ mode, selectedBlockIds: [] }),
+      setStrokeColor: (color) => set({ strokeColor: color }),
+      setStrokeWidth: (width) => set({ strokeWidth: width }),
     }),
     {
       name: 'notecanai-blocks',

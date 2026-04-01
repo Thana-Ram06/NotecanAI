@@ -1,0 +1,131 @@
+}
+Build a modern web application called "NoteCanvas AI".
+
+Tech Stack:
+- Next.js 16 (App Router)
+- TypeScript
+- Tailwind CSS
+- Zustand for state management
+- No backend database (use localStorage)
+- Vercel-ready
+
+Core Features:
+
+1. Canvas System:
+- Use a full-screen canvas area
+- Support both:
+  a) Div-based draggable blocks (for notes & shapes)
+  b) HTML5 Canvas overlay for free drawing (pencil tool)
+
+2. Blocks:
+- Text notes (editable contentEditable)
+- Rectangle shapes
+- Circle shapes
+
+Each block should support:
+- Drag & move
+- Change color
+- Change font
+- Editable text (for text blocks)
+- Rounded corners
+
+3. Pencil Tool (VERY IMPORTANT):
+- Add a toolbar button "✏️ Pencil"
+- When active:
+  - User can draw freely on canvas using mouse
+  - Use HTML5 Canvas API
+  - Smooth drawing (lineTo, beginPath)
+  - Adjustable stroke color
+  - Adjustable stroke width
+- Store drawing paths in state and save to localStorage
+
+4. Font System:
+- Add font selector dropdown in toolbar
+
+Fonts to include:
+- Inter (default)
+- serif
+- monospace
+- Add handwritten fonts using Google Fonts:
+  - "Patrick Hand"
+  - "Caveat"
+  - "Indie Flower"
+
+Apply font dynamically to selected text block using style={{ fontFamily }}
+
+5. Toolbar:
+Top fixed toolbar with:
+- Add Note
+- Add Rectangle
+- Add Circle
+- Pencil Tool toggle
+- Color picker
+- Stroke width (for pencil)
+- Font selector
+- AI buttons:
+  - Generate Notes
+  - Improve Text
+  - Generate Diagram
+
+6. State (Zustand):
+Blocks structure:
+{
+  id: string,
+  type: "text" | "rectangle" | "circle",
+  content?: string,
+  x: number,
+  y: number,
+  color: string,
+  font: string
+}
+
+Drawing structure:
+{
+  id: string,
+  points: [{x, y}],
+  color: string,
+  width: number
+}
+
+7. Persistence:
+- Save both blocks and drawings to localStorage
+- Load on startup
+
+8. AI Integration:
+- Use OpenAI API (gpt-4.1-mini)
+- API route: /api/ai
+
+Features:
+a) Generate Notes → create new text block
+b) Improve Text → update selected block
+c) Diagram Generator → return blocks JSON and render
+
+9. UI Design:
+- Premium minimal SaaS style
+- Centered canvas
+- Light + dark mode
+- Soft gray background
+- Clean spacing
+- Rounded UI
+- Minimal shadows
+
+10. Interactions:
+- Smooth dragging
+- Pencil drawing should not interfere with block dragging
+- Toggle between "Select Mode" and "Draw Mode"
+
+11. File Structure:
+- app/page.tsx
+- components/Canvas.tsx
+- components/Block.tsx
+- components/Toolbar.tsx
+- components/DrawingCanvas.tsx
+- store/useStore.ts
+- app/api/ai/route.ts
+
+12. Performance:
+- Optimize re-renders
+- Use requestAnimationFrame for drawing
+
+Goal:
+Create a clean, minimal, fast, and AI-powered notes + drawing app where users can write notes, draw freely with pencil, use handwritten fonts, and generate content using A
