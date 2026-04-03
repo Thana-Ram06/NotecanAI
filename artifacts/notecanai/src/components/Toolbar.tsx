@@ -382,6 +382,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
 
+          {/* X (Twitter) link */}
+          <a
+            href="https://x.com/tr_dev06?s=21"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center rounded-full w-8 h-8 hover:bg-accent transition-colors touch-manipulation"
+            title="Follow on X"
+            data-testid="x-link"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+          </a>
+
         </div>
       </div>
     </div>
